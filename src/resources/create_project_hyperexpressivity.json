@@ -1,0 +1,164 @@
+{
+    "projectName": "sdsd",
+    "action": 2,
+    "stageOneProjectId": 3210,
+    "netlistMetadata": {
+        "fileName": "Lauren_Pugh_monCFET.spice",
+        "netlistType": "GLOBAL",
+        "cellSelections": [
+            {
+                "cell_name": "AND2X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "AND2X2",
+                "is_selected": false
+            },
+            {
+                "cell_name": "AOI21X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "AOI22X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "BUFX2",
+                "is_selected": false
+            },
+            {
+                "cell_name": "BUFX4",
+                "is_selected": false
+            },
+            {
+                "cell_name": "CLKBUF1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "CLKBUF2",
+                "is_selected": false
+            },
+            {
+                "cell_name": "CLKBUF3",
+                "is_selected": false
+            },
+            {
+                "cell_name": "DFFNEGX1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "DFFPOSX1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "DFFSR",
+                "is_selected": false
+            },
+            {
+                "cell_name": "FAX1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "HAX1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "INVX1",
+                "is_selected": true
+            },
+            {
+                "cell_name": "INVX2",
+                "is_selected": false
+            },
+            {
+                "cell_name": "INVX4",
+                "is_selected": false
+            },
+            {
+                "cell_name": "INVX8",
+                "is_selected": false
+            },
+            {
+                "cell_name": "INVD4",
+                "is_selected": false
+            },
+            {
+                "cell_name": "INVX4_CFET_NEW",
+                "is_selected": false
+            },
+            {
+                "cell_name": "INVX4_CFET",
+                "is_selected": false
+            },
+            {
+                "cell_name": "LATCH",
+                "is_selected": false
+            },
+            {
+                "cell_name": "MUX2X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "MUX21X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "NAND2X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "NAND3X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "NOR2X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "NOR3X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "OAI21X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "OAI22X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "OR2X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "OR2X2",
+                "is_selected": false
+            },
+            {
+                "cell_name": "TBUFX1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "TBUFX2",
+                "is_selected": false
+            },
+            {
+                "cell_name": "XNOR2X1",
+                "is_selected": false
+            },
+            {
+                "cell_name": "XOR2X1",
+                "is_selected": false
+            }
+        ]
+    },
+    "techMetadata": {
+        "fileName": "Lauren_Pugh_monCFET.tech",
+        "techType": "GLOBAL"
+    },
+    "selectedLayouts": [
+        "INVX1_1_RT_6"
+    ],
+    "selectAll": false,
+    "projectType": 0
+}

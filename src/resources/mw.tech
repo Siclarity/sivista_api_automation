@@ -1,0 +1,261 @@
+layer_map = {
+    'l_nnanosheet': (100, 0),
+    'l_pnanosheet': (103, 0),
+    'l_npoly': (305, 0),
+    'l_ppoly': (307, 0),
+    'l_gate_diffusion': (350,0),
+    'l_diffusion_break': (310,0),
+    'l_ndiffusion': (400, 0),
+    'l_pdiffusion': (402, 0),
+    'l_interconnect_via':(600,0),
+    'l_poly_contact': (701, 0),
+    'l_npoly_contact': (703, 0),
+    'l_via1':(700, 0),
+    'l_via2':(702, 0),
+    'l_pdiff_contact': (404, 0),
+    'l_ndiff_contact': (404, 0),
+    'l_metal1': (1000, 0),
+    'l_metal1_label':(1000, 1),
+    'l_metal1_pin':(1000, 2),
+    'l_metal1_pin_label':(1000, 3),
+    'l_metal_tracks': (2000, 0),
+    'l_m1_m2_via':(750, 0),
+    'l_metal2':(1050, 0),
+    'l_metal2_label':(1050, 1),
+    'l_metal2_pin':(1050, 2)
+    'l_metal2_pin_label':(1050, 3)
+    'l_metal2_tracks':(2050, 0),
+    'l_power_rail': (800, 0),
+    'l_power_rail_label':(800, 1),
+    'l_power_rail_pin': (800, 2),
+    'l_power_rail_pin_label': (800, 3),
+    'l_bspdn_pmos':(601,0),
+    'l_abutment_box': (10000, 0)  
+}
+
+#Technology and design Rule
+'technology' = 'cfet'
+'backside_power_rail' = True
+'routing_capability' = 'Single Metal Solution'
+'flipped' = 'R0'
+'half_dr' = True
+
+#variable parameters
+'number_of_routing_tracks' = 6
+# Component widths
+'inner_space_width' = 6
+'nanosheet_width' = 21,
+'power_rail_width' = 37.5
+'via_extension' = 2.5
+'gate_extension' = 15
+'interconnect_extension' = 0
+'np_spacing' = 40
+#gate_spacing
+'vertical_gate_spacing' = 10
+#interconnect_spacing 
+'vertical_interconnect_spacing' = 20
+'pg_signal_spacing' = 10
+#pitch
+'routing_grid_pitch_y' = 25
+'vertical_metal_pitch' = 30
+#Height requirement for 200+ transistor POC
+'height_req' = 1
+#kind of implementation
+'placer' = 'meta'
+
+# Minimum spacing rules for layer pairs.
+min_spacing = {
+    ('l_nanosheet', 'l_interconnect_via'):15
+}
+
+#wire width
+wire_width = {
+    'l_npoly': 15,
+    'l_ppoly': 15,
+    'l_ndiffusion': 18,
+    'l_pdiffusion': 18,
+    'l_metal1': 12,
+    'l_metal_tracks': 12.5,
+    'l_metal2': 12,
+    'l_metal2_tracks': 12.5
+}
+
+# TO-DO: User Interface
+routing_order = {
+    'pdiffusion': 1,
+    'ndiffusion': 2,
+    'ppoly': 1,
+    'npoly': 2
+}
+
+hinder = {
+    'ndiffusion': 'pdiffusion',
+    'npoly': 'ppoly'
+}
+permutation = {
+}
+
+# parameters that are not required
+
+
+'scaling_factor' = 4
+'db_unit' = 1e-9
+#'db_unit' = db_unit/scaling_factor
+'transistor_channel_width_sizing' = 1
+
+# Define a list of output writers.
+output_writers = [
+    
+    GdsWriter(
+        db_unit=db_unit,
+        output_map=layer_map
+    ),
+]
+
+# Layer for the pins.
+'pin_layer' = 'l_power_rail'
+
+# Power stripe layer
+'power_layer' = 'l_power_rail'
+'connectable_layers' = {'l_nwell'}
+'nanosheet' = 'l_nanosheet'
+
+#hidden for now because of CFET BUT will be used in GAA or older technologies
+'transistor_offset_y' = 30
+'unit_cell_width' = 45
+'unit_cell_height' = 150 
+
+# Minimum gate widths of transistors, i.e. minimal widths of l_ndiffusion and l_pdiffusion.
+#hidden parameters to keep will be taken care later
+'minimum_gate_width_nfet' = 80
+'minimum_gate_width_pfet' = 80
+
+#keep  it for debugging not for UI 
+multi_via = {
+}
+
+# # ROUTING #
+#can be ruled out
+'orientation_change_penalty' = 10
+# # Enable double vias between layers.
+
+
+# unchanged parameters
+
+# # Routing edge weights per data base unit.
+weights_horizontal = {
+    'l_metal1': 10,
+    'l_power_rail': 1,
+    'l_nanosheet': 1,
+}
+weights_vertical = {
+    'l_ndiffusion': 20,
+    'l_pdiffusion': 20,
+    'l_poly': 20,
+    'l_npoly': 20,
+    'l_ppoly': 20,
+}
+
+# Via weights.
+via_weights = {
+    ('l_metal1', 'l_ndiffusion'): 5,
+    ('l_metal1', 'l_pdiffusion'): 5,
+    ('l_power_rail', 'l_ndiffusion'): 5,
+    ('l_power_rail', 'l_pdiffusion'): 5,
+    ('l_metal1', 'l_poly'): 5,
+    ('l_metal1', 'l_npoly'): 5,
+    ('l_metal1', 'l_ppoly'): 5,
+    ('l_nanosheet', 'l_ndiffusion'): 5,
+    ('l_nanosheet', 'l_pdiffusion'): 5,
+    ('l_nanosheet', 'l_poly'): 5,
+    ('l_nanosheet', 'l_npoly'): 5,
+    ('l_nanosheet', 'l_ppoly'): 5,
+}
+routing_layers = {
+    'l_ndiffusion': 'v',
+    'l_pdiffusion': 'v',
+    'l_poly': 'v',
+    'l_npoly': 'v',
+    'l_ppoly': 'v',
+    'l_metal1': 'h',
+    'l_power_rail': 'h',
+    'l_nanosheet': 'h',
+}
+
+
+via_size = {
+    'l_poly_contact': 23,
+    'l_pdiff_contact': 18,
+    'l_ndiff_contact': 18,
+    'l_via1': 15,
+    'l_interconnect_via':15,
+	'l_via2': 15,
+    'l_npoly_contact': 23,
+    'l_m1_m2_via': 12.5,
+	
+}
+'gate_length' = 100
+minimum_enclosure = {
+    ('l_ndiffusion', 'l_poly_contact'): 0 ,
+    ('l_pdiffusion', 'l_poly_contact'): 0 ,
+    ('l_metal1', 'l_via1'): 0,
+    ('l_metal1', 'l_poly_contact'): 0 ,
+    ('l_metal1', 'l_poly_contact'): 0 ,
+    ('l_power_rail', 'l_ndiff_contact'): 0,
+    ('l_power_rail', 'l_ndiff_contact'): 0 ,
+    ('l_nanosheet', 'l_poly_contact'): 0,
+    ('l_nanosheet', 'l_poly_contact'): 0 ,
+    ('l_nanosheet', 'l_poly_contact'): 0 ,
+    ('l_poly', 'l_via1'): 0,
+}
+'my_unused2' = (602, 0)
+'my_diffusionlayer' = (350, 0)
+
+my_add_pmos_nanosheet = (layer_map.get(l_pnanosheet, 0)[0], 1)
+my_add_nmos_nanosheet = (layer_map.get(l_nnanosheet, 0)[0], 1)
+
+metrics_map = [
+    ('NMOS_NANOSHEET', layer_map.get(l_nnanosheet, (0, 0))),
+    ('NMOS_ACT_PATTERNED', my_add_nmos_nanosheet),
+    ('PMOS_NANOSHEET', layer_map.get(l_pnanosheet, (0, 0))),
+    ('PMOS_ACT_PATTERNED', my_add_pmos_nanosheet),
+    ('NMOS_GATE', layer_map.get(l_npoly, (0, 0))),
+    ('NMOS_INTERCONNECT', layer_map.get(l_ndiffusion, (0, 0))),
+    ('PMOS_GATE', layer_map.get(l_ppoly, (0, 0))),
+    ('PMOS_INTERCONNECT', layer_map.get(l_pdiffusion, (0, 0))),
+    ('SINGLE_DIFFUSION_BREAK', layer_map.get(l_diffusion_break, (0, 0))),
+    ('VIA_FROM_INTERCONNECT_TO_BACKSIDE_POWER_TSVBAR', layer_map.get(l_ndiff_contact, (0, 0))),
+    ('VIA_FROM_PMOS_INTERCONNECT_TO_NMOS_INTERCONNECT', layer_map.get(l_interconnect_via, (0, 0))),
+    ('VIA_FROM_M0_TO_PMOS_INTERCONNECT_VCT', layer_map.get(l_via1, (0, 0))),
+    ('VIA_FROM_M0_TO_PMOS_GATE_VG', layer_map.get(l_poly_contact, (0, 0))),
+    ('M2_BACKSIDE_POWER_LINES', layer_map.get(l_power_rail, (0, 0))),
+    ('BACKSIDE_POWER_LINES_LABEL', layer_map.get(l_power_rail_label, (0, 0))),
+    ('M0', layer_map.get(l_metal1, (0, 0))),
+    ('M0_LABEL', layer_map.get(l_metal1_label, (0, 0))),
+    ('CELL_BOUNDARY', layer_map.get(l_abutment_box, (0, 0))),
+]
+
+f2f_layers = {
+    'NMOS_GATE': 'NMOS_INTERCONNECT',
+    'PMOS_GATE': 'PMOS_INTERCONNECT'
+}
+
+layer_properties = {
+    800: { 'color': 0xFD68B3, 'opacity': 1, 'offset': 0, 'height': 5, 'shape': 'box', 'name': 'M2_BACKSIDE_POWER_LINES' },
+    404: { 'color': 0xFF0000, 'opacity': 1, 'offset': 4, 'height': 12, 'shape': 'box', 'name': 'VIA_FROM_INTERCONNECT_TO_BACKSIDE_POWER_TSVBAR' },
+    400: { 'color': 0x37FEFD, 'opacity': 1, 'offset': 8, 'height': 6, 'shape': 'box', 'name': 'NMOS_INTERCONNECT' },
+    100: { 'color': 0xFF9966, 'opacity': 1, 'offset': 6, 'height': 10, 'shape': 'diamond', 'name': 'NMOS_NANOSHEET' },
+    305: { 'color': 0x30B0B0, 'opacity': 1, 'offset': 8, 'height': 8, 'shape': 'box', 'name': 'NMOS_GATE' },
+    307: { 'color': 0x46C773, 'opacity': 1, 'offset': 16, 'height': 8, 'shape': 'box', 'name': 'PMOS_GATE' },
+    350: { 'color': 0xFFD6D6, 'opacity': 1, 'offset': 14, 'height': 4, 'shape': 'box', 'name': 'DIFFUSION_BREAK' },
+    402: { 'color': 0x61CB21, 'opacity': 1, 'offset': 16, 'height': 6, 'shape': 'box', 'name': 'PMOS_INTERCONNECT' },
+    600: { 'color': 0x62FF00, 'opacity': 1, 'offset': 14, 'height': 2, 'shape': 'box', 'name': 'VIA_FROM_PMOS_INTERCONNECT_TO_NMOS_INTERCONNECT' },
+    103: { 'color': 0x444444, 'opacity': 1, 'offset': 14, 'height': 10, 'shape': 'diamond', 'name': 'PMOS_NANOSHEET' },
+    700: { 'color': 0xFF0080, 'opacity': 1, 'offset': 22, 'height': 10, 'shape': 'box', 'name': 'VIA_FROM_M0_TO_PMOS_INTERCONNECT_VCT' },
+    701: { 'color': 0xFF00FF, 'opacity': 1, 'offset': 24, 'height': 8, 'shape': 'box', 'name': 'VIA_FROM_M0_TO_PMOS_GATE_VG' },
+    702: { 'color': 0xD133FF, 'opacity': 1, 'offset': 14, 'height': 18, 'shape': 'box', 'name': 'via_nm0' },
+    703: { 'color': 0x8D0000, 'opacity': 1, 'offset': 16, 'height': 16, 'shape': 'box', 'name': ''  },
+    1000: { 'color': 0xF0FF69, 'opacity': 1, 'offset': 32, 'height': 5, 'shape': 'box', 'name': 'M0' },
+    10000: { 'color': 0xEFEFEF, 'opacity': 1, 'offset': -5, 'height': 5, 'shape': 'box', 'name': 'CELL_BOUNDARY' },
+    # 2000: { 'color': 0x8F33FF, 'opacity': 0, 'offset': 10, 'height': 10, 'shape': 'box', 'name': 'ROUTING_TRACKS' }
+}

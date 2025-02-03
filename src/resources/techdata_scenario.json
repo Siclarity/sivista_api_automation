@@ -1,0 +1,27 @@
+{
+  "scenarios": [
+    {
+      "name": "Scenario 1: Empty FileName",
+      "payload_file": "src/resources/techdata.json",
+      "modifications": {
+        "FileName": ""
+      }
+    },
+
+      {
+      "name": "Scenario 2: Valid Payload",
+      "payload_file": "src/resources/techdata.json",
+      "modifications": {}
+    },
+
+
+
+    {
+      "name": "Scenario 3: Different FileName Extension",
+      "payload_file": "src/resources/techdata.json",
+      "modifications": {
+        "FileName": "monCFET.spice"
+      }
+    }
+  ]
+}
