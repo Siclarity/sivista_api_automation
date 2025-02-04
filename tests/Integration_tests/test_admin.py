@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class TestAdmin(Baseclass):
-    file_path = "C:/Users/MeghakMahadi/PycharmProjects/API_Automation/src/resources/mw.tech"
-
-    netlist_file_path = "C:/Users/MeghakMahadi/PycharmProjects/API_Automation/src/resources/mw.spice"
+    # file_path = "C:/Users/MeghakMahadi/PycharmProjects/API_Automation/src/resources/mw.tech"
+    #
+    # netlist_file_path = "C:/Users/MeghakMahadi/PycharmProjects/API_Automation/src/resources/mw.spice"
 
     #
     @pytest.fixture(scope="class")
@@ -34,7 +34,7 @@ class TestAdmin(Baseclass):
         assert response.json() is not None
         # Assertions to validate the response
         assert response.status_code == 200, f"Unexpected status code: {response.status_code}"
-        logger.info(f"tech file uploaded succesfully")
+        logger.info(f"tech file uploaded successfully")
 
     @pytest.fixture(scope="class")
     def test_get_uploaded_tech_file(self, test_login, get_file):

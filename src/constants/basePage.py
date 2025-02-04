@@ -4,9 +4,13 @@ import json
 
 
 class Baseclass:
+    file_path = "src/resources/mw.tech"
+
+    netlist_file_path = "src/resources/mw.spice"
+
     def get_base_url(self):
-        #return "http://13.202.227.36:8001"
-        return "http://13.200.63.95:3001"
+        return "http://13.202.227.36:8001"
+        #return "http://13.200.63.95:3001"
 
     def get_user_login(self):
         return self.get_base_url() + "/user/login/"

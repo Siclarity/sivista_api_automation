@@ -72,8 +72,9 @@ class TestSivista(Baseclass):
         assert project_id is not None
         logger.info(f"project id for layout{project_id}")
         logger.info(f"cell name is{cell_name}")
-        return project_id, unique_project_name, cell_name
         logger.info(f"stage1 project created succesfully")
+        return project_id, unique_project_name, cell_name
+
 
     def test_project_status_once_created(self, test_login, test_create_project_layout):
         payload = Payload()
@@ -110,7 +111,7 @@ class TestSivista(Baseclass):
         logger.info(f"response for run_layout{response.json()}")
         assert response.status_code == 200
         assert response.json() is not None
-        time.sleep(10)
+        time.sleep(25)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -208,6 +209,7 @@ class TestSivista(Baseclass):
         url = self.get_stage_download_all_layout()
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(10)
         print(response.headers)
         assert response.status_code == 200
         #Dynamically construct the expected filename
@@ -312,9 +314,28 @@ class TestSivista(Baseclass):
         payload = payload.get_run_list_payload()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         assert response.json() is not None
-        assert response.status_code == 405
-        logger.info(f"job list API executed successfully")
+        if response.status_code == 200:
+            assert response.json().get("status") is True, "Expected status=True for running jobs"
+            logger.info("✅ Job list retrieved successfully. Running jobs found.")
 
+        elif response.status_code == 404:
+            assert response.json().get("status") is False, "Expected status=False when no running jobs"
+            assert response.json().get("message") == "There is not any running job present", "Unexpected error message"
+            logger.info("⚠️ No running jobs found.")
+
+        else:
+            pytest.fail(f"Unexpected status code: {response.status_code()}, Response: {response.json()}")
+
+    # def test_get_job_list(self, test_login):
+    #     headers = self.common_header()
+    #     payload = Payload()
+    #     headers["Authorization"] = f"Bearer {test_login}"
+    #     url = self.get_job_list()
+    #     payload = payload.get_run_list_payload()
+    #     response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+    #     assert response.json() is not None
+    #     assert response.status_code == 405
+    #     logger.info(f"job list API executed successfully")
 
     def test_get_stage1_ready_list(self, test_login):
         headers = self.common_header()
@@ -325,7 +346,6 @@ class TestSivista(Baseclass):
         assert response.status_code == 200
         logger.info(f"stage1 ready API  executed successfully")
 
-
     def test_get_project_details_stage1(self, test_login, test_create_project_layout):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
@@ -335,7 +355,6 @@ class TestSivista(Baseclass):
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"project details fpr stage1 executed successfully")
-
 
     #========================================================================================
 
@@ -366,7 +385,6 @@ class TestSivista(Baseclass):
         assert stage2_project_name is not None
         logger.info(f"stage2 project created {stage2_project_id} successfully")
 
-
     #
     @pytest.fixture(scope="class")
     def test_run_project_hyperexpressvity(self, test_login, create_project_hyperexpressivity, test_stage1_result,
@@ -385,7 +403,7 @@ class TestSivista(Baseclass):
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         print(response.json())
-        time.sleep(15)
+        time.sleep(30)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -481,6 +499,7 @@ class TestSivista(Baseclass):
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         print(response.headers)
+        time.sleep(10)
         assert response.status_code == 200
         #Dynamically construct the expected filename
         expected_filename = f"{unique_project_name}_Stage2.zip"
@@ -591,7 +610,6 @@ class TestSivista(Baseclass):
 
         logger.info(f"delete API for stage1 executed successfully")
 
-
     def test_delete_stage2_project(self, test_login, create_project_hyperexpressivity):
         project_id, unique_project_name, = create_project_hyperexpressivity
         headers = self.common_header()
@@ -649,7 +667,6 @@ class TestSivista(Baseclass):
         assert unique_project_name is not None
         logger.info(f"project created API executed successfully with {project_id}")
 
-
     @pytest.fixture(scope="class")
     def test_run_layout_project_action3(self, test_login, test_create_project_action3):
         payload = Payload()
@@ -664,19 +681,17 @@ class TestSivista(Baseclass):
         logger.info(f"response for run_layout{response.json()}")
         assert response.status_code == 200
         assert response.json() is not None
-        time.sleep(10)
+        time.sleep(25)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
         logger.info(f"job id for stage2 {jobId}")
         return jobId
 
-
     def test_verify_run_layout_project_action3(self, test_run_layout_project_action3):
         jobid = test_run_layout_project_action3
         assert jobid is not None
         logger.info(f"run api for action3 executed successfully")
-
 
     def test_get_stage1_job_details_action3(self, test_login, test_run_layout_project_action3):
         jobid = test_run_layout_project_action3
@@ -687,7 +702,6 @@ class TestSivista(Baseclass):
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"stage project details executed successfully for action3")
-
 
     @pytest.fixture(scope="class")
     def test_stage1_result_action3(self, test_login, test_create_project_action3):
@@ -722,7 +736,6 @@ class TestSivista(Baseclass):
             print(layout)
 
         return extracted_filename, response, layout_data_list
-
 
     def test_get_gds_images_stage1_action3(self, test_login, test_stage1_result_action3):
         _, _, layout_data_list = test_stage1_result_action3
@@ -764,7 +777,9 @@ class TestSivista(Baseclass):
         url = self.get_stage_download_all_layout()
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        print(response.headers)
+        time.sleep(10)
+        #print(response.headers)
+
         assert response.status_code == 200
         #Dynamically construct the expected filename
         expected_filename = f"{unique_project_name}_Stage1.zip"
@@ -780,7 +795,6 @@ class TestSivista(Baseclass):
             f"Content-Disposition header value is '{content_disposition}', expected 'filename={expected_filename}'."
         )
         logger.info(f"download all API executed successfully")
-
 
     def test_single_gds_download_action3(self, test_login, test_create_project_action3, test_stage1_result_action3):
         #assert self.extracted_filename is not None, "test_stage1_result must run before test_single_gds_download"
@@ -842,7 +856,7 @@ class TestSivista(Baseclass):
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         print(response.json())
-        time.sleep(15)
+        time.sleep(30)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -878,7 +892,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(30)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         filenames = [
@@ -936,7 +950,8 @@ class TestSivista(Baseclass):
         url = self.get_stage_download_all_layout()
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        print(response.headers)
+        time.sleep(10)
+        logger.info(f"{response.headers}")
         assert response.status_code == 200
         #Dynamically construct the expected filename
         expected_filename = f"{unique_project_name}_Stage2.zip"
