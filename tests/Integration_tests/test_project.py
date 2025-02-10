@@ -111,7 +111,7 @@ class TestSivista(Baseclass):
         logger.info(f"response for run_layout{response.json()}")
         assert response.status_code == 200
         assert response.json() is not None
-        time.sleep(25)
+        time.sleep(30)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -129,6 +129,7 @@ class TestSivista(Baseclass):
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        time.sleep(10)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"details fetch succesfully for {jobid}")
@@ -148,6 +149,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(15)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         logger.info(f"show_result api for stage1 executed successfully")
@@ -179,6 +181,7 @@ class TestSivista(Baseclass):
         logger.info(f"payload for gds{payload}")
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(20)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"GDS images API for stage1 executed successfully")
@@ -209,7 +212,7 @@ class TestSivista(Baseclass):
         url = self.get_stage_download_all_layout()
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(20)
         print(response.headers)
         assert response.status_code == 200
         #Dynamically construct the expected filename
@@ -243,6 +246,7 @@ class TestSivista(Baseclass):
 
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(20)
         assert response.status_code == 200
         assert response.headers is not None
         logger.info(f"stgae1 singlegdsheaders{response.headers}")
@@ -352,6 +356,7 @@ class TestSivista(Baseclass):
         project_id, _, _, = test_create_project_layout
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        time.sleep(10)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"project details fpr stage1 executed successfully")
@@ -403,7 +408,7 @@ class TestSivista(Baseclass):
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         print(response.json())
-        time.sleep(30)
+        time.sleep(40)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -418,6 +423,7 @@ class TestSivista(Baseclass):
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        time.sleep(10)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -440,7 +446,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(30)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         filenames = [
@@ -468,6 +474,7 @@ class TestSivista(Baseclass):
         project_id, _, = create_project_hyperexpressivity
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        time.sleep(15)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -481,6 +488,7 @@ class TestSivista(Baseclass):
         logger.info(f"payload for gds{payload}")
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(20)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -498,8 +506,8 @@ class TestSivista(Baseclass):
         url = self.get_stage_download_all_layout()
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        print(response.headers)
-        time.sleep(10)
+        #print(response.headers)
+        time.sleep(20)
         assert response.status_code == 200
         #Dynamically construct the expected filename
         expected_filename = f"{unique_project_name}_Stage2.zip"
@@ -530,6 +538,7 @@ class TestSivista(Baseclass):
 
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(10)
         assert response.status_code == 200
         assert response.headers is not None
 
@@ -555,6 +564,7 @@ class TestSivista(Baseclass):
         payload = payload.get_payload_stage1_edit_project()
         url = self.edit_stage_project(project_id)
         response = self.patch_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(10)
         print(response.json())
         assert response.json() is not None
         assert response.status_code == 200
@@ -567,6 +577,7 @@ class TestSivista(Baseclass):
         payload = payload.get_payload_stage2_edit_project()
         url = self.edit_stage_project(project_id)
         response = self.patch_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(10)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -581,6 +592,7 @@ class TestSivista(Baseclass):
         print("pppp", project_id)
         url = self.clear_stage_result()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(10)
         logger.info(f"response for run_layout{response.json()}")
         assert response.json() is not None
         assert response.status_code == 200
@@ -595,6 +607,7 @@ class TestSivista(Baseclass):
         print("pppp", project_id)
         url = self.clear_stage_result()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(10)
         logger.info(f"response for run_layout{response.json()}")
         assert response.json() is not None
         assert response.status_code == 200
@@ -699,6 +712,7 @@ class TestSivista(Baseclass):
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        time.sleep(5)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"stage project details executed successfully for action3")
@@ -718,6 +732,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(55)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         filenames = [
@@ -747,6 +762,7 @@ class TestSivista(Baseclass):
         logger.info(f"payload for gds{payload}")
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(5)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"gds images for action3 API executed successfully")
@@ -812,6 +828,7 @@ class TestSivista(Baseclass):
 
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(5)
         assert response.status_code == 200
         assert response.headers is not None
         logger.info(f"stgae1 singlegdsheaders{response.headers}")
@@ -855,8 +872,8 @@ class TestSivista(Baseclass):
         payload["cells"] = cell_name
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        print(response.json())
-        time.sleep(30)
+        #print(response.json())
+        time.sleep(50)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -870,6 +887,7 @@ class TestSivista(Baseclass):
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        time.sleep(5)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -892,7 +910,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(30)
+        time.sleep(55)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         filenames = [
@@ -920,6 +938,7 @@ class TestSivista(Baseclass):
         project_id, _, _, = test_create_project_action3
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        time.sleep(5)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -933,6 +952,7 @@ class TestSivista(Baseclass):
         logger.info(f"payload for gds{payload}")
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(5)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -983,6 +1003,7 @@ class TestSivista(Baseclass):
 
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(5)
         assert response.status_code == 200
         assert response.headers is not None
 

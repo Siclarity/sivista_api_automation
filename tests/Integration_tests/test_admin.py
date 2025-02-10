@@ -45,6 +45,7 @@ class TestAdmin(Baseclass):
         payload = payload.get_payload_get_techfile()
 
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+
         assert response.json() is not None
         assert response.status_code == 200
         response_data = response.json()
