@@ -19,7 +19,7 @@ class Baseclass:
         return self.get_base_url() + "/project/create/"
 
     def check_project_status(self):
-        return self.get_base_url()+"/project/checkproject/"
+        return self.get_base_url() + "/project/checkproject/"
 
     def run_layout(self):
         return self.get_base_url() + "/run/project/"
@@ -35,7 +35,6 @@ class Baseclass:
 
     def get_techlist(self):
         return self.get_base_url() + "/tech/getlist/"
-
 
     def stage1_result(self):
         return self.get_base_url() + "/stage/result/"
@@ -88,7 +87,7 @@ class Baseclass:
     def delete_tech_file(self):
         return self.get_base_url() + "/administrator/delete/file/"
 
-    def create_user(self):
+    def create_user_(self):
         return self.get_base_url() + "/profile/create/"
 
     def modify_user_details(self, UserId):
@@ -101,11 +100,10 @@ class Baseclass:
         return self.get_base_url() + f"/project/delete/{projectid}/"
 
     def refresh_token(self):
-        return self.get_base_url()+f"/token/refresh/"
+        return self.get_base_url() + f"/token/refresh/"
 
     def about_API(self):
-        return self.get_base_url()+f"/user/about"
-
+        return self.get_base_url() + f"/user/about"
 
     def get_request(self, url, auth, headers, in_json):
         response = requests.get(url=url, auth=auth, headers=headers)
@@ -137,12 +135,11 @@ class Baseclass:
             return post_response_data.json()
         return post_response_data
 
-    def delete_file(self, url, auth, headers,payload, in_json):
-        post_response_data = requests.delete(url=url, auth=auth, headers=headers,data=json.dumps(payload))
+    def delete_file(self, url, auth, headers, payload, in_json):
+        post_response_data = requests.delete(url=url, auth=auth, headers=headers, data=json.dumps(payload))
         if in_json is True:
             return post_response_data.json()
         return post_response_data
-
 
     def common_header(self):
         headers = {

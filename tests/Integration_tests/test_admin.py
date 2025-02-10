@@ -7,6 +7,8 @@ import requests
 from src.helpers.payload_manager import Payload
 from src.constants.basePage import Baseclass
 
+from conftest import log_test_result
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,30 +24,37 @@ class TestAdmin(Baseclass):
         yield file  # The file is yielded for use in tests
         file.close()
 
-    def test_upload_tech_file(self, test_login, get_file):
+    def test_upload_tech_file(self, test_login, get_file, session_csv_filename):
         headers = self.common_header1(test_login)
 
         # Use the file provided by the fixture
         files = {"upload": get_file}
         url = self.get_file_upload()
+        test_name = "test_upload_tech_file"
 
         # Example upload request
         response = requests.post(url, headers=headers, files=files)
         assert response.json() is not None
+
         # Assertions to validate the response
+
+        status = "PASS" if response.status_code == 200 else "FAIL"
         assert response.status_code == 200, f"Unexpected status code: {response.status_code}"
         logger.info(f"tech file uploaded successfully")
+        log_test_result(test_name, url, status, session_csv_filename)
 
     @pytest.fixture(scope="class")
-    def test_get_uploaded_tech_file(self, test_login, get_file):
+    def test_get_uploaded_tech_file(self, test_login, get_file,session_csv_filename,):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_file_list()
+        test_name = "test_get_uploaded_tech_file"
         payload = Payload()
         payload = payload.get_payload_get_techfile()
 
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         response_data = response.json()
@@ -66,9 +75,10 @@ class TestAdmin(Baseclass):
         assert file_id is not None, "fileId not found for the uploaded file"
         logger.info(f"File ID of the uploaded tech file: {file_id}")
 
+
         return file_id  # Optionally return it if you need to use it
 
-    def test_modify_tech_File(self, test_login, get_file, test_get_uploaded_tech_file):
+    def test_modify_tech_File(self, test_login, get_file, test_get_uploaded_tech_file,session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         payload = Payload()
@@ -81,15 +91,19 @@ class TestAdmin(Baseclass):
         logger.info(f"payload for modify_netlist is{payload}")
         url = self.get_modify_file()
         response = self.put_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        test_name ="test_modify_tech_File"
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.json())
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"tech file modified successfully")
 
-    def test_delete_tech_file(self, test_login, get_file, test_get_uploaded_tech_file):
+    def test_delete_tech_file(self, test_login, get_file, test_get_uploaded_tech_file,session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         payload = Payload()
+        test_name="test_delete_tech_file"
         tech_file = os.path.basename(get_file.name)
         FileId = test_get_uploaded_tech_file
         logger.info(f"file name is{tech_file}")
@@ -99,9 +113,11 @@ class TestAdmin(Baseclass):
         logger.info(f"payload for deletetechdata is{payload}")
         url = self.delete_tech_file()
         response = self.delete_file(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.json())
-        assert response.json()is not None
-        assert response.status_code==200
+        assert response.json() is not None
+        assert response.status_code == 200
         logger.info(f"tech file deleted succesfully")
 
     #######################for netlist file##################################
@@ -112,8 +128,9 @@ class TestAdmin(Baseclass):
         yield file  # The file is yielded for use in tests
         file.close()
 
-    def test_upload_netlist_file(self, test_login, get_netlist_file):
+    def test_upload_netlist_file(self, test_login, get_netlist_file,session_csv_filename):
         headers = self.common_header1(test_login)
+        test_name = "test_upload_netlist_file"
 
         # Use the file provided by the fixture
         files = {"upload": get_netlist_file}
@@ -121,20 +138,25 @@ class TestAdmin(Baseclass):
 
         # Example upload request
         response = requests.post(url, headers=headers, files=files)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         # Assertions to validate the response
         assert response.status_code == 200, f"Unexpected status code: {response.status_code}"
         logger.info(f"netlist file uploaded succesfully")
 
     @pytest.fixture(scope="class")
-    def test_get_uploaded_netlist_file(self, test_login, get_netlist_file):
+    def test_get_uploaded_netlist_file(self, test_login, get_netlist_file,session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_file_list()
+        test_name ="test_get_uploaded_netlist_file"
         payload = Payload()
         payload = payload.get_payload_get_netlistfile()
 
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         # assert response.json() is not None
         # assert response.status_code ==200
         response_data = response.json()
@@ -157,10 +179,11 @@ class TestAdmin(Baseclass):
 
         return file_id  # Optionally return it if you need to use it
 
-    def test_modify_netlist_File(self, test_login, get_netlist_file, test_get_uploaded_netlist_file):
+    def test_modify_netlist_File(self, test_login, get_netlist_file, test_get_uploaded_netlist_file,session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         payload = Payload()
+        test_name = "test_modify_netlist_File"
         tech_file = os.path.basename(get_netlist_file.name)
         FileId = test_get_uploaded_netlist_file
         logger.info(f"file name is{tech_file}")
@@ -170,15 +193,18 @@ class TestAdmin(Baseclass):
         logger.info(f"payload for modify_netlist is{payload}")
         url = self.get_modify_file()
         response = self.put_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.json())
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"netlist file updated successfully")
 
-    def test_delete_netlist_file(self, test_login, get_netlist_file, test_get_uploaded_netlist_file):
+    def test_delete_netlist_file(self, test_login, get_netlist_file, test_get_uploaded_netlist_file,session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         payload = Payload()
+        test_name ="test_delete_netlist_file"
         tech_file = os.path.basename(get_netlist_file.name)
         FileId = test_get_uploaded_netlist_file
         logger.info(f"file name is{tech_file}")
@@ -188,6 +214,8 @@ class TestAdmin(Baseclass):
         logger.info(f"payload for deletenetlist is{payload}")
         url = self.delete_tech_file()
         response = self.delete_file(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.json())
         assert response.status_code == 200
         assert response.json() is not None

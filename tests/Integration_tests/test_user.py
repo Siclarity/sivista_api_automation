@@ -12,17 +12,22 @@ from faker import Faker
 from src.helpers.payload_manager import Payload
 from src.constants.basePage import Baseclass
 
+from conftest import log_test_result
+
 logger = logging.getLogger(__name__)
 faker = Faker()  # Initialize Faker instance
 
 
 class TestUser(Baseclass):
 
-    def test_about_api(self, test_login):
+    def test_about_api(self, test_login,session_csv_filename):
         url = self.about_API()
         headers = self.common_header()
+        test_name = "test_about_api"
         headers["Authorization"] = f"Bearer {test_login}"
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -38,7 +43,7 @@ class TestUser(Baseclass):
         payload = Payload()
         payload = payload.get_payload_create_user()
         payload["username"] = faker.unique.user_name()[:5]
-        url = self.create_user()
+        url = self.create_user_()
         logger.info(f"Creating user with username: {payload}")
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         UserID = response.json().get("data", {}).get("UserID")
@@ -47,18 +52,22 @@ class TestUser(Baseclass):
 
         return UserID, response
 
-
-    def test_create_user(self, test_login, create_User):
+    def test_create_user(self, test_login,create_User, session_csv_filename):
         UserID, response = create_User
+        url = self.create_user_()
+        test_name = "test_create_user"
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert UserID is not None
         assert response.status_code == 200
         assert response.json() is not None
 
-    def test_modify_user_details(self, test_login, create_User):
+    def test_modify_user_details(self,test_login, create_User, session_csv_filename):
         fake = Faker()
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         payload = Payload()
+        test_name = "test_modify_user_details"
         payload = payload.get_payload_modify_user()
         UserID, _, = create_User
         url = self.modify_user_details(UserID)
@@ -68,33 +77,39 @@ class TestUser(Baseclass):
         actual_name = random_name.upper()
 
         response = self.patch_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 201 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 201
         assert response.json() is not None
         expected_name = response.json().get("data", {}).get("name")
         assert actual_name == expected_name
 
-    def test_profile_user_list(self, test_login):
+    def test_profile_user_list(self, test_login,session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         payload = Payload()
+        test_name="test_profile_user_list"
         payload = payload.get_payload_profile_list()
         url = self.user_profile_list()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         logger.info("user profile list API executed successfully")
 
-
-
-    def test_disable_user(self, test_login, create_User):
+    def test_disable_user(self, test_login, create_User,session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         payload = Payload()
+        test_name = "test_disable_user"
         payload = payload.get_payload_modify_user()
         UserID, _, = create_User
         payload["isActive"] = False
         url = self.modify_user_details(UserID)
         response = self.patch_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 201 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 201
         assert response.json() is not None
         logger.info("modified user details API executed successfully")
@@ -118,14 +133,17 @@ class TestUser(Baseclass):
         print("Access Token:", access_token)
         return access_token, refresh_token
 
-    def test_refresh_token(self, test_user_login):
+    def test_refresh_token(self, test_user_login,session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_refresh_token"
         payload = payload.get_payload_dummy_user()
         access_token, refresh_token = test_user_login
         payload["refresh"] = refresh_token
         url = self.refresh_token()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response)
         assert response.json() is not None
         assert response.status_code == 200
@@ -157,10 +175,11 @@ class TestUser(Baseclass):
         with open(file_path, "w") as file:
             json.dump(data, file, indent=4)
 
-    def test_update_password(self, test_user_login):
+    def test_update_password(self, test_user_login,session_csv_filename):
         access_token, _ = test_user_login
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {access_token}"
+        test_name = "test_update_password"
 
         # Load JSON files before making the request
         dummy_user = self.load_json("src/resources/dummy_user.json")
@@ -169,6 +188,8 @@ class TestUser(Baseclass):
         # Send API request with current password
         url = self.password_update()
         response = self.post_request(url, auth=None, headers=headers, payload=password_data, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.json())
         #logger.info(f"response{response.json()}")
 

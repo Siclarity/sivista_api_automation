@@ -7,36 +7,45 @@ from src.helpers.payload_manager import Payload
 from src.constants.basePage import Baseclass
 from faker import Faker
 
+from conftest import log_test_result
+
 logger = logging.getLogger(__name__)
 
 
 class TestSivista(Baseclass):
 
-    def test_project_status(self, test_login):
+    def test_project_status(self, test_login, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_project_status"
         headers["Authorization"] = f"Bearer {test_login}"
 
         payload = payload.get_payload_check_project_status()
 
         url = self.check_project_status()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+
         logger.info(f"response for run_layout{response.json()}")
         assert response.status_code == 200
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         logger.info(f"project status api executed succesfully")
 
-    def test_project_list(self, test_login):
+    def test_project_list(self, test_login, session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_project_list"
         url = self.project_list()
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"project list api executed succesfully")
 
     @pytest.fixture(scope="class")
-    def test_create_project_layout(self, test_login):
+    def test_create_project_layout(self, test_login, session_csv_filename):
         """
         Fixture to create a project and return the project ID.
         The project ID is generated for every test that uses this fixture.
@@ -48,6 +57,7 @@ class TestSivista(Baseclass):
 
         # Load the base payload
         payload = payload.get_payload_create_project()
+        test_name = "test_create_project_layout"
 
         # Generate a unique project name using Faker
         unique_project_name = fake.unique.name().replace(" ", "_")
@@ -65,6 +75,8 @@ class TestSivista(Baseclass):
         response = base.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
 
         # Assert the response
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200, f"Expected 200 but got {response.status_code}. Response: {response.json()}"
         assert response.json() is not None
         logger.info(f"response.json()")
@@ -75,10 +87,10 @@ class TestSivista(Baseclass):
         logger.info(f"stage1 project created succesfully")
         return project_id, unique_project_name, cell_name
 
-
-    def test_project_status_once_created(self, test_login, test_create_project_layout):
+    def test_project_status_once_created(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_project_status_once_created"
         headers["Authorization"] = f"Bearer {test_login}"
         _, project_name, _ = test_create_project_layout
 
@@ -87,6 +99,8 @@ class TestSivista(Baseclass):
 
         url = self.check_project_status()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 208 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         logger.info(f"response for run_layout{response.json()}")
         assert response.status_code == 208
         assert response.json() is not None
@@ -98,9 +112,10 @@ class TestSivista(Baseclass):
         assert unique_project_name is not None
 
     @pytest.fixture(scope="class")
-    def test_run_layout_project(self, test_login, test_create_project_layout):
+    def test_run_layout_project(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_run_layout_project"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_layout
         payload = payload.get_payload_run_project()
@@ -109,9 +124,9 @@ class TestSivista(Baseclass):
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         logger.info(f"response for run_layout{response.json()}")
-        assert response.status_code == 200
-        assert response.json() is not None
         time.sleep(30)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -123,21 +138,25 @@ class TestSivista(Baseclass):
         assert jobid is not None
         logger.info(f"stage1 project API executed succesfully with job id{jobid}")
 
-    def test_get_stage1_job_details(self, test_login, test_run_layout_project):
+    def test_get_stage1_job_details(self, test_login, test_run_layout_project, session_csv_filename):
         jobid = test_run_layout_project
+        test_name = "test_get_stage1_job_details"
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
         time.sleep(10)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"details fetch succesfully for {jobid}")
 
     @pytest.fixture(scope="class")
-    def test_stage1_result(self, test_login, test_create_project_layout):
+    def test_stage1_result(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_stage1_result"
         headers["Authorization"] = f"Bearer {test_login}"
         #project_id, unique_project_name, _, = test_create_project_layout
         project_id, _, _, = test_create_project_layout
@@ -150,6 +169,8 @@ class TestSivista(Baseclass):
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(15)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         logger.info(f"show_result api for stage1 executed successfully")
@@ -171,10 +192,11 @@ class TestSivista(Baseclass):
 
         return extracted_filename, response, layout_data_list
 
-    def test_get_gds_images_stage1(self, test_login, test_stage1_result):
+    def test_get_gds_images_stage1(self, test_login, test_stage1_result, session_csv_filename):
         _, _, layout_data_list = test_stage1_result
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_get_gds_images_stage1"
         headers["Authorization"] = f"Bearer {test_login}"
         payload = payload.get_payload_gds_images()
         payload["LayoutData"] = layout_data_list
@@ -182,6 +204,8 @@ class TestSivista(Baseclass):
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"GDS images API for stage1 executed successfully")
@@ -198,9 +222,10 @@ class TestSivista(Baseclass):
         assert response.json() is not None, "Response JSON should not be None"
         assert extracted_filename is not None, "Extracted filename should not be None"
 
-    def test_download_all_stage1(self, test_login, test_create_project_layout):
+    def test_download_all_stage1(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_download_all_stage1"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_layout
         #logger.info(f"unique projectname is{unique_project_name}")
@@ -213,6 +238,8 @@ class TestSivista(Baseclass):
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.headers)
         assert response.status_code == 200
         #Dynamically construct the expected filename
@@ -230,10 +257,12 @@ class TestSivista(Baseclass):
         )
         logger.info(f"downloadAPI for  stage1 executed successfully")
 
-    def test_single_gds_download(self, test_login, test_create_project_layout, test_stage1_result):
+    def test_single_gds_download(self, test_login, test_create_project_layout, test_stage1_result,
+                                 session_csv_filename):
         #assert self.extracted_filename is not None, "test_stage1_result must run before test_single_gds_download"
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_single_gds_download"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_layout
         url = self.single_gds_download()
@@ -247,6 +276,8 @@ class TestSivista(Baseclass):
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.headers is not None
         logger.info(f"stgae1 singlegdsheaders{response.headers}")
@@ -265,58 +296,71 @@ class TestSivista(Baseclass):
         )
         logger.info(f"download api for stage1 for single gds executed successfully")
 
-    def test_getlist_netlist(self, test_login):
+    def test_getlist_netlist(self, test_login, session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_getlist_netlist"
         url = self.get_netlist()
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response is not None
         assert response.status_code == 200
         logger.info(f"getlist for nrtlist API executed successfully")
 
-    def test_getlist_techlist(self, test_login):
+    def test_getlist_techlist(self, test_login, session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_getlist_techlist"
         url = self.get_techlist()
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response is not None
         assert response.status_code == 200
         logger.info(f"getlist for tech file API executed successfully")
 
-    def test_get_data(self, test_login):
+    def test_get_data(self, test_login, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_get_data"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_netlist_data()
         payload = payload.get_payload_netlist_getdata()
         print(payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.json())
         assert response.status_code == 200
         assert response.json() is not None
         logger.info(f"get data for netlist executed successfully")
 
-    def test_techdata(self, test_login):
+    def test_techdata(self, test_login, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
         payload = payload.get_payload_techdata()
-
+        test_name = "test_techdata"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_techdata()
 
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         logger.info(f"get data for techfile executed successfully")
 
-    def test_get_job_list(self, test_login):
+    def test_get_job_list(self, test_login, session_csv_filename):
         headers = self.common_header()
         payload = Payload()
+        test_name = "test_get_job_list"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_list()
         payload = payload.get_run_list_payload()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         if response.status_code == 200:
             assert response.json().get("status") is True, "Expected status=True for running jobs"
@@ -341,22 +385,28 @@ class TestSivista(Baseclass):
     #     assert response.status_code == 405
     #     logger.info(f"job list API executed successfully")
 
-    def test_get_stage1_ready_list(self, test_login):
+    def test_get_stage1_ready_list(self, test_login, session_csv_filename):
         headers = self.common_header()
+        test_name = "test_get_stage1_ready_list"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_stage1_ready()
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"stage1 ready API  executed successfully")
 
-    def test_get_project_details_stage1(self, test_login, test_create_project_layout):
+    def test_get_project_details_stage1(self, test_login, test_create_project_layout, session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_get_project_details_stage1"
         project_id, _, _, = test_create_project_layout
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
         time.sleep(10)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"project details fpr stage1 executed successfully")
@@ -364,9 +414,11 @@ class TestSivista(Baseclass):
     #========================================================================================
 
     @pytest.fixture(scope="class")
-    def create_project_hyperexpressivity(self, test_login, test_create_project_layout, test_stage1_result):
+    def create_project_hyperexpressivity(self, test_login, test_create_project_layout, test_stage1_result,
+                                         session_csv_filename):
         headers = self.common_header()
         fake = Faker()
+        test_name = "create_project_hyperexpressivity"
         headers["Authorization"] = f"Bearer {test_login}"
         stage1_projectid, _, _, = test_create_project_layout
         selected_layout, _, _, = test_stage1_result
@@ -379,6 +431,8 @@ class TestSivista(Baseclass):
         payload["selectedLayouts"] = [selected_layout]
         url = self.create_project()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         stage2_project_id = response.json().get("data", {}).get("projectId")
@@ -393,9 +447,10 @@ class TestSivista(Baseclass):
     #
     @pytest.fixture(scope="class")
     def test_run_project_hyperexpressvity(self, test_login, create_project_hyperexpressivity, test_stage1_result,
-                                          test_create_project_layout):
+                                          test_create_project_layout, session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_run_project_hyperexpressvity"
         stage2_project_id, _, = create_project_hyperexpressivity
         stage1_project, _, cell_name = test_create_project_layout
         selected_layout, _, _, = test_stage1_result
@@ -409,6 +464,8 @@ class TestSivista(Baseclass):
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         print(response.json())
         time.sleep(40)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -417,13 +474,16 @@ class TestSivista(Baseclass):
         return jobId
 
     #
-    def test_get_stage2_job_details(self, test_login, test_run_project_hyperexpressvity):
+    def test_get_stage2_job_details(self, test_login, test_run_project_hyperexpressvity, session_csv_filename):
         jobid = test_run_project_hyperexpressvity
         headers = self.common_header()
+        test_name = "test_get_stage2_job_details"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
         time.sleep(10)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -432,10 +492,11 @@ class TestSivista(Baseclass):
         assert jobId is not None
 
     @pytest.fixture(scope="class")
-    def test_stage2_show_result(self, test_login, create_project_hyperexpressivity):
+    def test_stage2_show_result(self, test_login, create_project_hyperexpressivity, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_stage2_show_result"
         # project_id, unique_project_name, _, = test_create_project_layout
         project_id, _, = create_project_hyperexpressivity
         payload = payload.get_payload_stage2_result()
@@ -447,6 +508,8 @@ class TestSivista(Baseclass):
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(30)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         filenames = [
@@ -468,33 +531,40 @@ class TestSivista(Baseclass):
         assert response.status_code == 200
         assert layout_data_list is not None
 
-    def test_get_project_details_stage2(self, test_login, create_project_hyperexpressivity):
+    def test_get_project_details_stage2(self, test_login, create_project_hyperexpressivity, session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_get_project_details_stage2"
         project_id, _, = create_project_hyperexpressivity
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
         time.sleep(15)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
-    def test_get_gds_images_stage2(self, test_login, test_stage2_show_result):
+    def test_get_gds_images_stage2(self, test_login, test_stage2_show_result, session_csv_filename):
         _, _, layout_data_list = test_stage2_show_result
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_get_gds_images_stage2"
         headers["Authorization"] = f"Bearer {test_login}"
         payload = payload.get_payload_gds_images()
         payload["LayoutData"] = layout_data_list
         logger.info(f"payload for gds{payload}")
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(20)
+        time.sleep(30)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
-    def test_download_all_stage2(self, test_login, create_project_hyperexpressivity):
+    def test_download_all_stage2(self, test_login, create_project_hyperexpressivity, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_download_all_stage2"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name = create_project_hyperexpressivity
         #logger.info(f"unique projectname is{unique_project_name}")
@@ -507,7 +577,9 @@ class TestSivista(Baseclass):
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         #print(response.headers)
-        time.sleep(20)
+        time.sleep(30)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         #Dynamically construct the expected filename
         expected_filename = f"{unique_project_name}_Stage2.zip"
@@ -523,10 +595,12 @@ class TestSivista(Baseclass):
             f"Content-Disposition header value is '{content_disposition}', expected 'filename={expected_filename}'."
         )
 
-    def test_single_gds_download_stage2(self, test_login, create_project_hyperexpressivity, test_stage2_show_result):
+    def test_single_gds_download_stage2(self, test_login, create_project_hyperexpressivity, test_stage2_show_result,
+                                        session_csv_filename):
         #assert self.extracted_filename is not None, "test_stage1_result must run before test_single_gds_download"
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_single_gds_download_stage2"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name = create_project_hyperexpressivity
         url = self.single_gds_download()
@@ -538,7 +612,9 @@ class TestSivista(Baseclass):
 
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.headers is not None
 
@@ -556,35 +632,42 @@ class TestSivista(Baseclass):
             f"Content-Disposition header value is '{content_disposition}', expected 'filename={expected_filename}'."
         )
 
-    def test_edit_stage1_project(self, test_login, test_create_project_layout):
+    def test_edit_stage1_project(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
         project_id, unique_project_name, _, = test_create_project_layout
         headers = self.common_header()
+        test_name = "test_edit_stage1_project"
         headers["Authorization"] = f"Bearer {test_login}"
         payload = payload.get_payload_stage1_edit_project()
         url = self.edit_stage_project(project_id)
         response = self.patch_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         print(response.json())
         assert response.json() is not None
         assert response.status_code == 200
 
-    def test_edit_stage2_project(self, test_login, create_project_hyperexpressivity):
+    def test_edit_stage2_project(self, test_login, create_project_hyperexpressivity, session_csv_filename):
         payload = Payload()
         project_id, unique_project_name = create_project_hyperexpressivity
         headers = self.common_header()
+        test_name = "test_edit_stage2_project"
         headers["Authorization"] = f"Bearer {test_login}"
         payload = payload.get_payload_stage2_edit_project()
         url = self.edit_stage_project(project_id)
         response = self.patch_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
     #
-    def test_clear_result_stage1(self, test_login, test_create_project_layout):
+    def test_clear_result_stage1(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_clear_result_stage1"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_layout
         payload = payload.clear_result_stage1()
@@ -592,43 +675,54 @@ class TestSivista(Baseclass):
         print("pppp", project_id)
         url = self.clear_stage_result()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         logger.info(f"response for run_layout{response.json()}")
         assert response.json() is not None
         assert response.status_code == 200
 
-    def test_clear_result_stage2(self, test_login, create_project_hyperexpressivity):
+    def test_clear_result_stage2(self, test_login, create_project_hyperexpressivity, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_clear_result_stage2"
         project_id, unique_project_name = create_project_hyperexpressivity
         payload = payload.clear_result_stage2()
         payload["projectId"] = project_id
         print("pppp", project_id)
         url = self.clear_stage_result()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         logger.info(f"response for run_layout{response.json()}")
         assert response.json() is not None
         assert response.status_code == 200
 
-    def test_delete_stage1_project(self, test_login, test_create_project_layout):
+    def test_delete_stage1_project(self, test_login, test_create_project_layout, session_csv_filename):
         project_id, unique_project_name, _, = test_create_project_layout
         headers = self.common_header()
+        test_name = "test_delete_stage1_project"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.delete_project(project_id)
         response = self.delete_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
 
         logger.info(f"delete API for stage1 executed successfully")
 
-    def test_delete_stage2_project(self, test_login, create_project_hyperexpressivity):
+    def test_delete_stage2_project(self, test_login, create_project_hyperexpressivity, session_csv_filename):
         project_id, unique_project_name, = create_project_hyperexpressivity
         headers = self.common_header()
+        test_name = "test_delete_stage2_project"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.delete_project(project_id)
         response = self.delete_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         logger.info(f"delete API for stage2 executed successfully")
@@ -636,7 +730,7 @@ class TestSivista(Baseclass):
         ########################################action3###############################
 
     @pytest.fixture(scope="class")
-    def test_create_project_action3(self, test_login):
+    def test_create_project_action3(self, test_login, session_csv_filename):
         """
         Fixture to create a project and return the project ID.
         The project ID is generated for every test that uses this fixture.
@@ -645,6 +739,7 @@ class TestSivista(Baseclass):
         base = Baseclass()
         payload = Payload()  # Initialize your Baseclass (adjust if needed)
         headers = base.common_header()
+        test_name = "test_create_project_action3"
 
         # Load the base payload
         payload = payload.get_payload_create_action3()
@@ -663,7 +758,8 @@ class TestSivista(Baseclass):
 
         # Send the API request
         response = base.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         # Assert the response
         assert response.status_code == 200, f"Expected 200 but got {response.status_code}. Response: {response.json()}"
         assert response.json() is not None
@@ -681,9 +777,10 @@ class TestSivista(Baseclass):
         logger.info(f"project created API executed successfully with {project_id}")
 
     @pytest.fixture(scope="class")
-    def test_run_layout_project_action3(self, test_login, test_create_project_action3):
+    def test_run_layout_project_action3(self, test_login, test_create_project_action3, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_run_layout_project_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_action3
         payload = payload.get_payload_run_layout_Action3()
@@ -692,9 +789,10 @@ class TestSivista(Baseclass):
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         logger.info(f"response for run_layout{response.json()}")
-        assert response.status_code == 200
-        assert response.json() is not None
+
         time.sleep(25)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -706,21 +804,25 @@ class TestSivista(Baseclass):
         assert jobid is not None
         logger.info(f"run api for action3 executed successfully")
 
-    def test_get_stage1_job_details_action3(self, test_login, test_run_layout_project_action3):
+    def test_get_stage1_job_details_action3(self, test_login, test_run_layout_project_action3, session_csv_filename):
         jobid = test_run_layout_project_action3
         headers = self.common_header()
+        test_name = "test_get_stage1_job_details_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
         time.sleep(5)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"stage project details executed successfully for action3")
 
     @pytest.fixture(scope="class")
-    def test_stage1_result_action3(self, test_login, test_create_project_action3):
+    def test_stage1_result_action3(self, test_login, test_create_project_action3, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_stage1_result_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         # project_id, unique_project_name, _, = test_create_project_layout
         project_id, _, _, = test_create_project_action3
@@ -733,6 +835,8 @@ class TestSivista(Baseclass):
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(55)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         filenames = [
@@ -752,10 +856,11 @@ class TestSivista(Baseclass):
 
         return extracted_filename, response, layout_data_list
 
-    def test_get_gds_images_stage1_action3(self, test_login, test_stage1_result_action3):
+    def test_get_gds_images_stage1_action3(self, test_login, test_stage1_result_action3, session_csv_filename):
         _, _, layout_data_list = test_stage1_result_action3
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_get_gds_images_stage1_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         payload = payload.get_payload_gds_images()
         payload["LayoutData"] = layout_data_list
@@ -763,6 +868,8 @@ class TestSivista(Baseclass):
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(5)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"gds images for action3 API executed successfully")
@@ -779,9 +886,10 @@ class TestSivista(Baseclass):
         assert response.json() is not None, "Response JSON should not be None"
         assert extracted_filename is not None, "Extracted filename should not be None"
 
-    def test_download_all_stage1_action3(self, test_login, test_create_project_action3):
+    def test_download_all_stage1_action3(self, test_login, test_create_project_action3, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_download_all_stage1_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_action3
         #logger.info(f"unique projectname is{unique_project_name}")
@@ -793,7 +901,9 @@ class TestSivista(Baseclass):
         url = self.get_stage_download_all_layout()
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(10)
+        time.sleep(20)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         #print(response.headers)
 
         assert response.status_code == 200
@@ -812,10 +922,12 @@ class TestSivista(Baseclass):
         )
         logger.info(f"download all API executed successfully")
 
-    def test_single_gds_download_action3(self, test_login, test_create_project_action3, test_stage1_result_action3):
+    def test_single_gds_download_action3(self, test_login, test_create_project_action3, test_stage1_result_action3,
+                                         session_csv_filename):
         #assert self.extracted_filename is not None, "test_stage1_result must run before test_single_gds_download"
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_single_gds_download_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_action3
         url = self.single_gds_download()
@@ -828,7 +940,9 @@ class TestSivista(Baseclass):
 
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(5)
+        time.sleep(15)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.headers is not None
         logger.info(f"stgae1 singlegdsheaders{response.headers}")
@@ -846,20 +960,24 @@ class TestSivista(Baseclass):
             f"Content-Disposition header value is '{content_disposition}', expected 'filename={expected_filename}'."
         )
 
-    def test_get_project_details_action3(self, test_login, test_create_project_action3):
+    def test_get_project_details_action3(self, test_login, test_create_project_action3, session_csv_filename):
         headers = self.common_header()
+        test_name = "test_get_project_details_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, _, _, = test_create_project_action3
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"project details for stage3 executed successfully")
 
     @pytest.fixture(scope="class")
     def test_run_project_hyperexpressvity_Action3(self, test_login, test_stage1_result_action3,
-                                                  test_create_project_action3):
+                                                  test_create_project_action3, session_csv_filename):
         headers = self.common_header()
+        test_name = "test_run_project_hyperexpressvity_Action3"
         headers["Authorization"] = f"Bearer {test_login}"
         stage2_project_id, _, _, = test_create_project_action3
         stage1_project, _, cell_name = test_create_project_action3
@@ -874,6 +992,8 @@ class TestSivista(Baseclass):
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         #print(response.json())
         time.sleep(50)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
@@ -881,13 +1001,17 @@ class TestSivista(Baseclass):
         logger.info(f"RUN api for action3 stage2 executed successfully")
         return jobId
 
-    def test_get_stage2_job_details_action3(self, test_login, test_run_project_hyperexpressvity_Action3):
+    def test_get_stage2_job_details_action3(self, test_login, test_run_project_hyperexpressvity_Action3,
+                                            session_csv_filename):
         jobid = test_run_project_hyperexpressvity_Action3
         headers = self.common_header()
+        test_name = "test_get_stage2_job_details_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.get_job_run(jobid)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
         time.sleep(5)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
@@ -896,9 +1020,10 @@ class TestSivista(Baseclass):
         assert jobId is not None
 
     @pytest.fixture(scope="class")
-    def test_stage2_show_result_action3(self, test_login, test_create_project_action3):
+    def test_stage2_show_result_action3(self, test_login, test_create_project_action3, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_stage2_show_result_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         # project_id, unique_project_name, _, = test_create_project_layout
         project_id, _, _, = test_create_project_action3
@@ -911,6 +1036,8 @@ class TestSivista(Baseclass):
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(55)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         response_data = response.json()
         print(f"response for stage1{response.json()}")
         filenames = [
@@ -932,20 +1059,24 @@ class TestSivista(Baseclass):
         assert response.status_code == 200
         assert layout_data_list is not None
 
-    def test_get_project_details_stage2_action3(self, test_login, test_create_project_action3):
+    def test_get_project_details_stage2_action3(self, test_login, test_create_project_action3, session_csv_filename):
         headers = self.common_header()
         headers["Authorization"] = f"Bearer {test_login}"
+        test_name = "test_get_project_details_stage2_action3"
         project_id, _, _, = test_create_project_action3
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
         time.sleep(5)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
-    def test_get_gds_images_stage2_action3(self, test_login, test_stage2_show_result_action3):
+    def test_get_gds_images_stage2_action3(self, test_login, test_stage2_show_result_action3, session_csv_filename):
         _, _, layout_data_list = test_stage2_show_result_action3
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_get_gds_images_stage2_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         payload = payload.get_payload_gds_images()
         payload["LayoutData"] = layout_data_list
@@ -953,12 +1084,15 @@ class TestSivista(Baseclass):
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(5)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
         assert response.status_code == 200
 
-    def test_download_all_stage2_action3(self, test_login, test_create_project_action3):
+    def test_download_all_stage2_action3(self, test_login, test_create_project_action3, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_download_all_stage2_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_action3
         #logger.info(f"unique projectname is{unique_project_name}")
@@ -971,6 +1105,8 @@ class TestSivista(Baseclass):
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(10)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         logger.info(f"{response.headers}")
         assert response.status_code == 200
         #Dynamically construct the expected filename
@@ -988,10 +1124,11 @@ class TestSivista(Baseclass):
         )
 
     def test_single_gds_download_stage2_action3(self, test_login, test_create_project_action3,
-                                                test_stage2_show_result_action3):
+                                                test_stage2_show_result_action3, session_csv_filename):
         #assert self.extracted_filename is not None, "test_stage1_result must run before test_single_gds_download"
         payload = Payload()
         headers = self.common_header()
+        test_name = "test_single_gds_download_stage2_action3"
         headers["Authorization"] = f"Bearer {test_login}"
         project_id, unique_project_name, _, = test_create_project_action3
         url = self.single_gds_download()
@@ -1004,6 +1141,8 @@ class TestSivista(Baseclass):
         print("payload for singlegds", payload)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
         time.sleep(5)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.headers is not None
 
@@ -1021,12 +1160,15 @@ class TestSivista(Baseclass):
             f"Content-Disposition header value is '{content_disposition}', expected 'filename={expected_filename}'."
         )
 
-    def test_delete_action3_project(self, test_login, test_create_project_action3):
+    def test_delete_action3_project(self, test_login, test_create_project_action3, session_csv_filename):
         project_id, unique_project_name, _, = test_create_project_action3
         headers = self.common_header()
+        test_name = "test_delete_action3_project"
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.delete_project(project_id)
         response = self.delete_request(url, auth=None, headers=headers, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
         assert response.json() is not None
         logger.info(f"delete API for action3 executed successfully")
