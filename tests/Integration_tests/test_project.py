@@ -44,6 +44,74 @@ class TestSivista(Baseclass):
         assert response.status_code == 200
         logger.info(f"project list api executed succesfully")
 
+    def test_validate_netlist(self, test_login, session_csv_filename):
+        headers = self.common_header()
+        headers['Authorization'] = f"Bearer {test_login}"
+        test_name = "test_validate_netlist"
+        url = self.validate_netlist()
+        payload = Payload()
+        payload = payload.get_payload_validate_netlist()
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
+        logger.info(f"response for run_layout{response.json()}")
+        assert response.status_code == 200
+        assert response.json() is not None
+        logger.info(f"netlist validate api executed successfully")
+
+    def test_download_global_netlist(self, test_login, session_csv_filename):
+        headers = self.common_header()
+        headers['Authorization'] = f"Bearer {test_login}"
+        test_name = "download_global_netlist"
+        url = self.download_file()
+        payload = Payload()
+        payload = payload.download_global_netlist()
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        expected_filename = "NETLIST_Files.zip"
+        if response.headers.get("X-Filename") != expected_filename:
+            status = "FAIL"
+            logger.error(
+                f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'.")
+
+        log_test_result(test_name, url, status, session_csv_filename)
+        assert response.status_code == 200
+        #expected_filename = "NETLIST_Files.zip"
+        print(f"headers filename is{expected_filename}")
+        assert response.headers["X-Filename"] == expected_filename, (
+            f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'."
+
+        )
+        logger.info(f"netlist validate api executed successfully")
+
+    def test_download_global_techfile(self, test_login, session_csv_filename):
+        headers = self.common_header()
+        headers['Authorization'] = f"Bearer {test_login}"
+        test_name = "test_download_global_techfile"
+        url = self.download_file()
+        payload = Payload()
+        payload = payload.download_global_netlist()
+        payload[0]['FileName'] = "monCFET.tech"
+        payload[0]['DirType'] = "techfile"
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        expected_filename = "TECHFILE_Files.zip"
+        if response.headers.get("X-Filename") != expected_filename:
+            status = "FAIL"
+            logger.error(
+                f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'.")
+
+        log_test_result(test_name, url, status, session_csv_filename)
+        assert response.status_code == 200
+        # expected_filename = "NETLIST_Files.zip"
+        print(f"headers filename is{expected_filename}")
+        assert response.headers["X-Filename"] == expected_filename, (
+            f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'."
+
+        )
+        logger.info(f"global techfile api executed successfully")
+
+    @pytest.mark.em
     @pytest.fixture(scope="class")
     def test_create_project_layout(self, test_login, session_csv_filename):
         """
@@ -87,6 +155,63 @@ class TestSivista(Baseclass):
         logger.info(f"stage1 project created succesfully")
         return project_id, unique_project_name, cell_name
 
+    def test_download_user_netlist(self, test_login, test_create_project_layout, session_csv_filename):
+        headers = self.common_header()
+        headers['Authorization'] = f"Bearer {test_login}"
+        test_name = "download_global_netlist"
+        url = self.download_file()
+        _, project_name, _ = test_create_project_layout
+        payload = Payload()
+        payload = payload.download_global_netlist()
+        payload[0]['FileType'] = "USER"
+        payload[0]['FileName'] = f"{project_name}_monCFET.spice"
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        expected_filename = "NETLIST_Files.zip"
+        if response.headers.get("X-Filename") != expected_filename:
+            status = "FAIL"
+            logger.error(
+                f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'.")
+
+        log_test_result(test_name, url, status, session_csv_filename)
+        assert response.status_code == 200
+        #expected_filename = "NETLIST_Files.zip"
+        print(f"headers filename is{expected_filename}")
+        assert response.headers["X-Filename"] == expected_filename, (
+            f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'."
+
+        )
+        logger.info(f"netlist validate api executed successfully")
+
+    def test_download_user_techfile(self, test_login, test_create_project_layout, session_csv_filename):
+        headers = self.common_header()
+        headers['Authorization'] = f"Bearer {test_login}"
+        test_name = "test_download_user_techfile"
+        url = self.download_file()
+        _, project_name, _ = test_create_project_layout
+        payload = Payload()
+        payload = payload.download_global_netlist()
+        payload[0]['FileType'] = "USER"
+        payload[0]['DirType'] = "techfile"
+        payload[0]['FileName'] = f"{project_name}_monCFET.tech"
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        status = "PASS" if response.status_code == 200 else "FAIL"
+        expected_filename = "TECHFILE_Files.zip"
+        if response.headers.get("X-Filename") != expected_filename:
+            status = "FAIL"
+            logger.error(
+                f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'.")
+
+        log_test_result(test_name, url, status, session_csv_filename)
+        assert response.status_code == 200
+        #expected_filename = "NETLIST_Files.zip"
+        print(f"headers filename is{expected_filename}")
+        assert response.headers["X-Filename"] == expected_filename, (
+            f"X-Filename header value is '{response.headers['X-Filename']}', expected '{expected_filename}'."
+
+        )
+        logger.info(f"download user techfile api executed successfully")
+
     def test_project_status_once_created(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
         headers = self.common_header()
@@ -106,11 +231,13 @@ class TestSivista(Baseclass):
         assert response.json() is not None
         logger.info(f"project status api after project creation executed successfully")
 
+    @pytest.mark.em
     def test_create_project_and_verify(self, test_create_project_layout):
         project_id, unique_project_name, _, = test_create_project_layout
         assert project_id is not None, "Project ID should be valid."
         assert unique_project_name is not None
 
+    @pytest.mark.em
     @pytest.fixture(scope="class")
     def test_run_layout_project(self, test_login, test_create_project_layout, session_csv_filename):
         payload = Payload()
@@ -130,13 +257,36 @@ class TestSivista(Baseclass):
         assert response.status_code == 200
         assert response.json() is not None
         jobId = response.json()['data']['jobId']
-        logger.info(f"job id for stage2 {jobId}")
+        logger.info(f"job id for stage1 {jobId}")
         return jobId
 
+    @pytest.mark.em
     def test_verify_run_layout_project(self, test_run_layout_project):
         jobid = test_run_layout_project
         assert jobid is not None
         logger.info(f"stage1 project API executed succesfully with job id{jobid}")
+
+    ##########################code commented for stage summary as code is not deployed on QA##############################################################
+
+
+    # @pytest.mark.em
+    # def test_stage1_run_summary(self, test_login, test_create_project_layout, session_csv_filename):
+    #     payload = Payload()
+    #     headers = self.common_header()
+    #     test_name = "test_stage1_run_summary"
+    #     headers["Authorization"] = f"Bearer {test_login}"
+    #     project_id, _, _, = test_create_project_layout
+    #     payload = payload.get_payload_stage_summary()
+    #     payload["projectId"] = project_id
+    #     logger.info(f"payload for stage1 summary is {payload}")
+    #     url = self.stage_summary()
+    #     response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+    #     logger.info(response.json())
+    #     status = "PASS" if response.status_code == 200 else "FAIL"
+    #     log_test_result(test_name, url, status, session_csv_filename)
+    #     assert response.status_code == 200
+    #     assert response.json() is not None
+    #     # logger.info(f"response for run_layout{response.json()}")
 
     def test_get_stage1_job_details(self, test_login, test_run_layout_project, session_csv_filename):
         jobid = test_run_layout_project
@@ -151,6 +301,7 @@ class TestSivista(Baseclass):
         assert response.json() is not None
         assert response.status_code == 200
         logger.info(f"details fetch succesfully for {jobid}")
+
 
     @pytest.fixture(scope="class")
     def test_stage1_result(self, test_login, test_create_project_layout, session_csv_filename):

@@ -105,6 +105,15 @@ class Baseclass:
     def about_API(self):
         return self.get_base_url() + f"/user/about"
 
+    def validate_netlist(self):
+        return self.get_base_url() + f"/netlist/validate/"
+
+    def download_file(self):
+        return self.get_base_url()+f"/stage/download/files/"
+
+    def stage_summary(self):
+        return self.get_base_url()+f"/stage/summary/"
+
     def get_request(self, url, auth, headers, in_json):
         response = requests.get(url=url, auth=auth, headers=headers)
         if in_json is True:

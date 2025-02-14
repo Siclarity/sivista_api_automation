@@ -248,6 +248,26 @@ class Payload():
             #print("techdata is", data)  # json.load reads directly from the file object
         return data
 
+    def get_payload_validate_netlist(self):
+        with open("src/resources/validate_netlist.json",
+                  "r") as file_data:  # Use 'with' to automatically close the file
+            data = json.load(file_data)
+            #print("techdata is", data)  # json.load reads directly from the file object
+        return data
+
+    def download_global_netlist(self):
+        with open("src/resources/download_global_netlist.json","r") as file_data:
+            data=json.load(file_data)
+        return data
+
+    def get_payload_stage_summary(self):
+        with open("src/resources/stage_summary.json","r") as file_data:
+            data=json.load(file_data)
+        return data
+
+
+
+
     # def get_payload(file_path, modifications=None):
     #     # Load the base payload from the specified file
     #     with open(file_path, "r") as file:
