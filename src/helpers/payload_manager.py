@@ -265,7 +265,10 @@ class Payload():
             data=json.load(file_data)
         return data
 
-
+    def get_payload_invalid_credentials(self):
+        with open("src/resources/invalid_credentials.json", "r") as file_data:  # Use 'with' to automatically close the file
+            data = json.load(file_data)  # json.load reads directly from the file object
+        return data
 
 
     # def get_payload(file_path, modifications=None):
