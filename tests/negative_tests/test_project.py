@@ -629,7 +629,7 @@ class TestSivista(Baseclass):
         payload = payload.get_payload_create_hyperexpressivity()
 
         payload["netlistMetadata"]["fileName"] = ""
-        logger.info(f"Payload : ,{payload}")
+        # logger.info(f"Payload : ,{payload}")
 
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.create_project()
@@ -655,7 +655,7 @@ class TestSivista(Baseclass):
         payload = payload.get_payload_create_hyperexpressivity()
 
         payload["netlistMetadata"]["fileName"] = None
-        logger.info(f"Payload : ,{payload}")
+        # logger.info(f"Payload : ,{payload}")
 
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.create_project()
@@ -680,7 +680,7 @@ class TestSivista(Baseclass):
         payload = payload.get_payload_create_hyperexpressivity()
 
         payload["netlistMetadata"]["fileName"] = "Lauren_Pugh_monCFET.csv"
-        logger.info(f"Payload : ,{payload}")
+        # logger.info(f"Payload : ,{payload}")
 
         headers["Authorization"] = f"Bearer {test_login}"
         url = self.create_project()
@@ -698,7 +698,109 @@ class TestSivista(Baseclass):
         # Assertions to verify login failure
         assert expected_message == actual_message
 
+    def test_create_project_hyper_with_tech_file_key_as_empty(self, test_login, session_csv_filename):
+        payload = Payload()  # Initialize your Baseclass (adjust if needed)
+        headers = self.common_header()
+        test_name = "test_create_project_hyper_with_tech_file_key_as_empty"
+        payload = payload.get_payload_create_hyperexpressivity()
 
+        payload["techMetadata"]["fileName"] = ""
+        # logger.info(f"Payload : ,{payload}")
+
+        headers["Authorization"] = f"Bearer {test_login}"
+        url = self.create_project()
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+
+        expected_message = "The file extension is incorrect. Please select a .spice file for the netlist and a .tech file for the PDK. "
+        actual_message = response.json().get("message")
+        logger.info(f"Response Status Code: {response.status_code}")
+        logger.info(f"Response JSON: {response.json()}")
+        logger.info(f"actual_message: {actual_message}")
+        logger.info(f"expected_message : {expected_message}")
+
+        status = "PASS" if response.status_code == 400 and actual_message == expected_message else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
+        # Assertions to verify login failure
+        assert expected_message == actual_message
+
+    def test_create_project_hyper_with_tech_file_key_as_null(self, test_login, session_csv_filename):
+        payload = Payload()  # Initialize your Baseclass (adjust if needed)
+        headers = self.common_header()
+        test_name = "test_create_project_hyper_with_netlist_file_key_as_null"
+        payload = payload.get_payload_create_hyperexpressivity()
+
+        payload["techMetadata"]["fileName"] = None
+        # logger.info(f"Payload : ,{payload}")
+
+        headers["Authorization"] = f"Bearer {test_login}"
+        url = self.create_project()
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+
+        expected_message = "The tech file name is missing or invalid. Please provide a valid string value for 'techFileName'."
+        actual_message = response.json().get("message")
+        logger.info(f"Response Status Code: {response.status_code}")
+        logger.info(f"Response JSON: {response.json()}")
+        logger.info(f"actual_message: {actual_message}")
+        logger.info(f"expected_message : {expected_message}")
+
+        status = "PASS" if response.status_code == 400 and actual_message == expected_message else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
+        # Assertions to verify login failure
+        assert expected_message == actual_message
+
+    def test_create_project_hyper_with_tech_file_extension_as_csv(self, test_login, session_csv_filename):
+        payload = Payload()  # Initialize your Baseclass (adjust if needed)
+        headers = self.common_header()
+        test_name = "test_create_project_hyper_with_netlist_file_key_as_empty"
+        payload = payload.get_payload_create_hyperexpressivity()
+
+        payload["techMetadata"]["fileName"] = "Lauren_Pugh_monCFET.csv"
+        # logger.info(f"Payload : ,{payload}")
+
+        headers["Authorization"] = f"Bearer {test_login}"
+        url = self.create_project()
+        response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+
+        expected_message = "The file extension is incorrect. Please select a .spice file for the netlist and a .tech file for the PDK. "
+        actual_message = response.json().get("message")
+        logger.info(f"Response Status Code: {response.status_code}")
+        logger.info(f"Response JSON: {response.json()}")
+        logger.info(f"actual_message: {actual_message}")
+        logger.info(f"expected_message : {expected_message}")
+
+        status = "PASS" if response.status_code == 400 and actual_message == expected_message else "FAIL"
+        log_test_result(test_name, url, status, session_csv_filename)
+        # Assertions to verify login failure
+        assert expected_message == actual_message
+
+    # def test_to_verify_check_project_endpoint_when_project_name_is_null(self, test_login, session_csv_filename):
+    #     payload = Payload()  # Initialize your Baseclass (adjust if needed)
+    #     headers = self.common_header()
+    #     test_name = "test_to_verify_check_project_endpoint_when_project_name_is_null"
+    #     payload = payload.get_payload_check_project_status()
+    #
+    #     # Generate a string with exactly 10 special characters
+    #     project_name = ''.join(random.choices(string.punctuation, k=10))
+    #
+    #     logger.info(f"Project name is : {project_name}")
+    #     payload["projectName"] = project_name
+    #     logger.info(f"Payload : ,{payload}")
+    #     headers["Authorization"] = f"Bearer {test_login}"
+    #     url = self.create_project()
+    #     response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+    #
+    #     expected_message = "Project name can't be only special characters"
+    #     actual_message = response.json().get("message")
+    #
+    #     logger.info(f"Response Status Code: {response.status_code}")
+    #     logger.info(f"Response JSON: {response.json()}")
+    #     logger.info(f"actual_message: {actual_message}")
+    #     logger.info(f"expected_message : {expected_message}")
+    #
+    #     status = "PASS" if response.status_code == 400 and actual_message == expected_message else "FAIL"
+    #     log_test_result(test_name, url, status, session_csv_filename)
+    #     # Assertions to verify login failure
+    #     assert expected_message == actual_message
 
 
 
