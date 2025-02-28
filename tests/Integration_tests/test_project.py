@@ -250,8 +250,8 @@ class TestSivista(Baseclass):
         print("pppp", project_id)
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(60)
         logger.info(f"response for run_layout{response.json()}")
-        time.sleep(30)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
@@ -319,7 +319,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(15)
+        time.sleep(60)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         response_data = response.json()
@@ -388,7 +388,7 @@ class TestSivista(Baseclass):
         url = self.get_stage_download_all_layout()
         print("url for stage1_download", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(20)
+        time.sleep(30)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         print(response.headers)
@@ -613,8 +613,9 @@ class TestSivista(Baseclass):
         payload["cells"] = cell_name
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+
+        time.sleep(60)
         print(response.json())
-        time.sleep(40)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
@@ -658,7 +659,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(30)
+        time.sleep(120)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         response_data = response.json()
@@ -689,7 +690,7 @@ class TestSivista(Baseclass):
         project_id, _, = create_project_hyperexpressivity
         url = self.get_project_details(project_id)
         response = self.get_request(url, auth=None, headers=headers, in_json=False)
-        time.sleep(15)
+        time.sleep(50)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
@@ -706,7 +707,7 @@ class TestSivista(Baseclass):
         logger.info(f"payload for gds{payload}")
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(30)
+        time.sleep(70)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
@@ -939,9 +940,8 @@ class TestSivista(Baseclass):
         print("pppp", project_id)
         url = self.run_layout()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
+        time.sleep(40)
         logger.info(f"response for run_layout{response.json()}")
-
-        time.sleep(25)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         assert response.status_code == 200
@@ -1186,7 +1186,7 @@ class TestSivista(Baseclass):
         url = self.stage1_result()
         print("url for stage1", url)
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(55)
+        time.sleep(120)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         response_data = response.json()
@@ -1234,7 +1234,7 @@ class TestSivista(Baseclass):
         logger.info(f"payload for gds{payload}")
         url = self.get_gds_images()
         response = self.post_request(url, auth=None, headers=headers, payload=payload, in_json=False)
-        time.sleep(5)
+        time.sleep(50)
         status = "PASS" if response.status_code == 200 else "FAIL"
         log_test_result(test_name, url, status, session_csv_filename)
         assert response.json() is not None
