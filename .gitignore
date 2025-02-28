@@ -1,0 +1,8 @@
+.venv
+allure-results/*
+allure-results_local/*
+assets/*
+browser_logs.txt
+report.html
+**/__pycache__/**
+
